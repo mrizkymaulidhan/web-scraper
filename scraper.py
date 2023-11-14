@@ -1,43 +1,53 @@
-import datetime
 import time
 import json
 import requests
 from bs4 import BeautifulSoup
 
-data_json={
-    'link':'',
-    'title':'',
-    'scraping_time':''
-}
+def scrape_news(url, headers):
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-news_data = []
+    if response.status_code == 200:
+        pupuler = soup.find('h3', class_='title6', string='Terpopuler')
+        if pupuler:
+            obj = pupuler.find_next('div', class_='most__wrap')
+            obj = obj.find_all('a')
 
-url = 'https://www.pikiran-rakyat.com/'
+            for item in obj:
+                data_json['link'] = item.get('href')
+                data_json['title'] = item.find('h2').text
+                data_json['scraping_time'] = time.asctime(time.localtime(time.time()))
+                news_data.append(dict(data_json))
+                
+            return news_data
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
-}
+        else:
+            print("Elemen 'Terpopuler' tidak ditemukan.")
+            return None
 
-response = requests.get(url, headers=headers)
-soup = BeautifulSoup(response.text,'html.parser')
+    else:
+        print(f'Request gagal (Status code: {response.status_code}) !!!')
+        return None
 
-if response.status_code == 200:
-    pupuler = soup.find('h3', class_='title6', string='Terpopuler')
-    if pupuler:
-        obj = pupuler.find_next('div', class_='most__wrap')        
-        obj = obj.find_all('a')
-        
-        for item in obj:
-            data_json['link'] = item.get('href')
-            data_json['title'] = item.find('h2').text
-            data_json['scraping_time'] = time.asctime(time.localtime(time.time()))
-            
-            news_data.append(dict(data_json))
-            
-        print(news_data)
+def save_to_json(data, filename):
+    if data:
+        with open(filename, "w") as write_file:
+            json.dump(data, write_file, indent=1)
+        print(f"Data berhasil disimpan ke {filename}")
+    else:
+        print("Tidak ada data yang disimpan.")
 
-else:
-    print(f'Request gagal (Status code: {response.status_code}) !!!')
-
-with open ("scraping_result.json", "w") as write_file:
-    json.dump(news_data, write_file, indent=1)
+if __name__ == "__main__":
+    news_data = []
+    data_json = {
+        'link': '',
+        'title': '',
+        'scraping_time': ''
+    }
+    url = 'https://www.pikiran-rakyat.com/'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+    }
+    
+    scraped_data = scrape_news(url, headers)
+    save_to_json(scraped_data, "scraping_result.json")
