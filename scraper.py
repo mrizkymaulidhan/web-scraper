@@ -23,7 +23,7 @@ def scrape_news(url, headers):
             return news_data
 
         else:
-            print('Elemen 'Terpopuler' tidak ditemukan.')
+            print(f"Elemen 'Terpopuler' tidak ditemukan.")
             return None
 
     else:
