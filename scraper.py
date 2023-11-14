@@ -8,9 +8,10 @@ def scrape_news(url, headers):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     if response.status_code == 200:
-        pupuler = soup.find('h3', class_='title6', string='Terpopuler')
-        if pupuler:
-            obj = pupuler.find_next('div', class_='most__wrap')
+        populer = soup.find('h3', class_='title6', string='Terpopuler')
+        
+        if populer:
+            obj = populer.find_next('div', class_='most__wrap')
             obj = obj.find_all('a')
 
             for item in obj:
@@ -22,7 +23,7 @@ def scrape_news(url, headers):
             return news_data
 
         else:
-            print("Elemen 'Terpopuler' tidak ditemukan.")
+            print('Elemen 'Terpopuler' tidak ditemukan.')
             return None
 
     else:
@@ -33,9 +34,10 @@ def save_to_json(data, filename):
     if data:
         with open(filename, "w") as write_file:
             json.dump(data, write_file, indent=1)
-        print(f"Data berhasil disimpan ke {filename}")
+        print(f'Data berhasil disimpan ke {filename}')
+        
     else:
-        print("Tidak ada data yang disimpan.")
+        print('Tidak ada data yang disimpan.')
 
 if __name__ == "__main__":
     news_data = []
